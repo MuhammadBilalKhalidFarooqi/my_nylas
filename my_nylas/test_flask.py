@@ -28,7 +28,7 @@ try:
             for msg in thread_messages.data:
                 
             
-                my_clean_email = my_nylas.messages.clean_messages(grant_id, request_body={'message_id': [msg.id]})
+                my_clean_email  = my_nylas.messages.clean_messages(grant_id, request_body={'message_id': [msg.id]})
                 emial_messages.append(my_clean_email)
             emial_messages.reverse()
             #clean_email = my_nylas.messages.clean_messages(grant_id, request_body= {'message_id':[message_id]})
