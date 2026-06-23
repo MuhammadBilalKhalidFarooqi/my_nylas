@@ -23,14 +23,8 @@ x_logger.info('Code started')
 
 # SYSTEM PROMPT
 my_system_prompt = """
-You are a helpful assistant that answers questions about 
-the user's Gmail documents. Be blunt and direct. Answer under 70 words. Alway start your answers with 'Hi, I am the assistant from Nevatech company'
+You are a helpful assistant that assists the customer's in products return queries. Be blunt and direct. Answer under 70 words. Alway start your answers with 'Hi, I am the assistant from Nevatech company'
 """
-
-
-
-
-
 
 
 # 2. LLM CONFIG
@@ -110,11 +104,11 @@ def back_task(email_data):
             
             
             if not email_type == ['SENT']: 
-                key = str(email_address[0]['email']) + '::' + str(thread_id)
+                session_key = str(email_address[0]['email']) + '::' + str(thread_id)
                 chat_memory = ChatMemoryBuffer.from_defaults(
                                                         token_limit= 3500,
                                                         chat_store=chat_store,
-                                                        chat_store_key=key
+                                                        chat_store_key=session_key
                                                         )
                 # B. Pulling CHAT HISTORY from SUPABASE        
                 chat_history = chat_memory.get()
@@ -141,13 +135,15 @@ def back_task(email_data):
                 x_logger.info(f' Subject: {subject} ')
                 send_draft(nylas_obj=my_nylas, grant_id=grant_id,msg_id=email_id,subject=subject,to=email_address,body=rag_response)
                 x_logger.info(f'Saved the data on chat history Supabase')
-                
-                
-                
-                
-            elif str(email_type) == ["SENT"] :
+         
+            elif email_type == ['SENT'] :
                 try:
-
+                    session_key = str(email_address[0]['email']) + '::' + str(thread_id)
+                    chat_memory = ChatMemoryBuffer.from_defaults(
+                                                        token_limit= 3500,
+                                                        chat_store=chat_store,
+                                                        chat_store_key=session_key
+                                                        )
                     AI_MSG = ChatMessage(role = MessageRole.ASSISTANT, content=email_message)
                     chat_memory.put(AI_MSG)
                     x_logger.info('AI EDITED response SUCCESSFULLY ADDED to SUPABASE')
@@ -164,12 +160,7 @@ def back_task(email_data):
             
     except Exception as e:
         x_logger.exception('Error inside the back task function!!')
-     
 
-
-    
-    
-    
 # -----------------------------------------------------------------------------------------------
 #                       MAIN FLASK + SUPABASE TASK
 # -----------------------------------------------------------------------------------------------
@@ -215,18 +206,10 @@ def testing_route():
                         # Write it in the logs
                         x_logger.error(f'Duplicate Email id DETECTED: {email_id}, Rejecting the request!!')
 
-
-
-
-
                     return 'OK', 200          
-    
-            
+
         else:
             print(f'\n{'+'*30}\n------------ERROR---------\n{'+'*30}\n')
-
-
-    
 
     except Exception as e:
         x_logger.exception(f'error here{'-' * 100}: \n{e}\n{'-' * 100}')
